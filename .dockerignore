@@ -1,0 +1,24 @@
+# Laravel
+vendor
+node_modules
+.env
+.env.*   # Catch other environment files
+storage/*.key
+storage/oauth-private.key
+storage/oauth-public.key
+
+# Frontend
+resources/js/node_modules
+public/hot
+public/storage
+build
+dist
+
+# Docker noise
+Dockerfile
+docker-compose.yml
+docker-compose.override.yml
+
+# Git
+.git
+.gitignore
