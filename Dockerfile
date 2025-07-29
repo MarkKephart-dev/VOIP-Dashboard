@@ -1,25 +1,29 @@
-# Dockerfile
 FROM php:8.3-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential libpng-dev libjpeg-dev libpq-dev zip unzip curl git libzip-dev \
-    && docker-php-ext-install pdo pdo_pgsql zip
+    sqlite3 \
+    libsqlite3-dev \
+    && docker-php-ext-install pdo pdo_pgsql pdo_sqlite zip
 
-# Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# ...other setup (composer, node, etc.)
 
 # Set working directory
-WORKDIR /var/www
+WORKDIR /app
 
+# Copy project files
 COPY . .
 
-RUN composer install
+# Install Composer deps
+RUN curl -sS https://getcomposer.org/installer | php && \
+    php composer.phar install --no-interaction --prefer-dist --optimize-autoloader
 
-# Permissions
-# Optional but recommended for Laravel applications
-RUN chown -R www-data:www-data /var/www \
-   && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+# Generate app key
+RUN php artisan key:generate
 
-EXPOSE 9000
-CMD ["php-fpm"]
+# Create SQLite database and seed it
+RUN touch database/database.sqlite \
+ && php artisan migrate --force \
+ && php artisan db:seed --force
+

@@ -14,6 +14,10 @@ public/storage
 build
 dist
 
+# Database
+database/*.sqlite
+database/*.sqlite3
+
 # Docker noise
 Dockerfile
 docker-compose.yml
