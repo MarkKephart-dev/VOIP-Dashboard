@@ -1,8 +1,6 @@
 # Laravel
 vendor
 node_modules
-.env
-.env.*   # Catch other environment files
 storage/*.key
 storage/oauth-private.key
 storage/oauth-public.key
@@ -11,7 +9,6 @@ storage/oauth-public.key
 resources/js/node_modules
 public/hot
 public/storage
-build
 dist
 
 # Database

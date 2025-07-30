@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
         ServicePlan::factory()->count(5)->create();
 
         // Create users with devices and jobs
-        User::factory()
+        $users = User::factory()
             ->count(10)
             ->has(
                 Device::factory()
@@ -28,5 +28,8 @@ class DatabaseSeeder extends Seeder
                     ->has(ProvisioningJob::factory()->count(1))
             )
             ->create();
+
+        $firstUser = $users->first();
+        echo "Seeded user:\nEmail: {$firstUser->email}\nPassword: password\n";
     }
 }

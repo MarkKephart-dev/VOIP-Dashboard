@@ -1,29 +1,41 @@
-FROM php:8.3-fpm
+FROM php:8.2-fpm
+
+# Set working dir
+WORKDIR /var/www
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    build-essential libpng-dev libjpeg-dev libpq-dev zip unzip curl git libzip-dev \
-    sqlite3 \
+    build-essential \
+    libpng-dev \
+    libjpeg-dev \
+    libpq-dev \
+    libzip-dev \
     libsqlite3-dev \
+    zip unzip curl git \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
     && docker-php-ext-install pdo pdo_pgsql pdo_sqlite zip
 
-# ...other setup (composer, node, etc.)
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
-WORKDIR /app
-
-# Copy project files
+# Copy app
 COPY . .
 
-# Install Composer deps
-RUN curl -sS https://getcomposer.org/installer | php && \
-    php composer.phar install --no-interaction --prefer-dist --optimize-autoloader
+# Copy environment file
+COPY .env.docker .env
 
-# Generate app key
-RUN php artisan key:generate
+# Install Node deps and build assets
+RUN npm install && npm run build
 
-# Create SQLite database and seed it
-RUN touch database/database.sqlite \
- && php artisan migrate --force \
- && php artisan db:seed --force
+# Install PHP dependencies
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
+# Make startup script executable
+RUN chmod +x startup.sh
+
+# Expose port
+EXPOSE 8080
+
+# Entrypoint: run the startup script
+ENTRYPOINT ["./startup.sh"]
